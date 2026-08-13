@@ -12,9 +12,9 @@ import os
 from datetime import UTC, datetime
 
 import httpx
+from kernel.models import ToolExecutionContext, ToolResult
 from pydantic import BaseModel, Field
 
-from kernel.models import ToolExecutionContext, ToolResult
 from lisa_packs.serper.models import WebSearchResponse, WebSearchResult
 
 __all__ = ["Parameters", "execute", "is_configured", "search"]
@@ -36,7 +36,10 @@ def _get_api_key() -> str:
 
 
 def _get_endpoint() -> str:
-    return os.environ.get("SERPER_SEARCH_ENDPOINT", _DEFAULT_ENDPOINT).strip() or _DEFAULT_ENDPOINT
+    return (
+        os.environ.get("SERPER_SEARCH_ENDPOINT", _DEFAULT_ENDPOINT).strip()
+        or _DEFAULT_ENDPOINT
+    )
 
 
 def _get_num_results() -> int:
@@ -54,7 +57,9 @@ def is_configured() -> bool:
     return bool(_get_api_key())
 
 
-async def search(query: str, client: httpx.AsyncClient | None = None) -> WebSearchResponse:
+async def search(
+    query: str, client: httpx.AsyncClient | None = None
+) -> WebSearchResponse:
     """Execute one Serper.dev Search query and return structured results.
 
     Raises:
@@ -63,7 +68,9 @@ async def search(query: str, client: httpx.AsyncClient | None = None) -> WebSear
     """
     api_key = _get_api_key()
     if not api_key:
-        raise RuntimeError("Serper search is not configured. Set SERPER_SEARCH_API_KEY to enable it.")
+        raise RuntimeError(
+            "Serper search is not configured. Set SERPER_SEARCH_API_KEY to enable it."
+        )
 
     payload: dict[str, object] = {
         "q": query,
@@ -127,7 +134,10 @@ async def execute(ctx: ToolExecutionContext) -> ToolResult:
     if not query:
         query = (ctx.query or "").strip()
     if not query:
-        return ToolResult(tool_id=ctx.tool_id or "serper_search", error="serper_search requires a query.")
+        return ToolResult(
+            tool_id=ctx.tool_id or "serper_search",
+            error="serper_search requires a query.",
+        )
 
     if not is_configured():
         return ToolResult(
@@ -137,7 +147,7 @@ async def execute(ctx: ToolExecutionContext) -> ToolResult:
 
     try:
         response = await search(query)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: BLE001  # broad-except is intentional at tool boundary
         return ToolResult(
             tool_id=ctx.tool_id or "serper_search",
             error=f"Serper search failed: {type(exc).__name__}: {exc}",
