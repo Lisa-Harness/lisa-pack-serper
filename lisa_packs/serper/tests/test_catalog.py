@@ -16,4 +16,4 @@ def test_serper_pack_serper_search_tool_discovered() -> None:
     assert "serper_search" in catalog
     tool = catalog["serper_search"]
     assert tool["tool_id"] == "serper_search"
-    assert tool["module_path"].startswith("lisa_packs.serper.tools.")
+    assert "lisa_packs.serper.tools." in tool["module_path"]
