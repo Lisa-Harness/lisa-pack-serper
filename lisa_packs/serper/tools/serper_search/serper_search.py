@@ -1,4 +1,4 @@
-"""Serper.dev Search tool provider for the serper_search contract.
+"""Serper.dev Search tool provider for the web_search contract.
 
 Uses the Serper.dev REST API (POST https://google.serper.dev/search) with
 ``X-API-KEY`` header authentication.  The response ``organic`` array contains
@@ -25,7 +25,7 @@ _SEARCH_TIMEOUT_SECONDS: float = 10.0
 
 
 class Parameters(BaseModel):
-    """Structured input parameters for the serper_search tool."""
+    """Structured input parameters for the web_search tool."""
 
     query: str = Field(..., description="The search query to execute.")
     count: int = Field(default=10, ge=1, le=20, description="Max results per query.")
@@ -123,7 +123,7 @@ def _parse_response(query: str, data: dict) -> WebSearchResponse:
 
 
 async def execute(ctx: ToolExecutionContext) -> ToolResult:
-    """Execute the serper_search tool — called by the tool registry dispatcher."""
+    """Execute the web_search tool — called by the tool registry dispatcher."""
     from pydantic import ValidationError
 
     try:
@@ -135,13 +135,13 @@ async def execute(ctx: ToolExecutionContext) -> ToolResult:
         query = (ctx.query or "").strip()
     if not query:
         return ToolResult(
-            tool_id=ctx.tool_id or "serper_search",
-            error="serper_search requires a query.",
+            tool_id=ctx.tool_id or "web_search",
+            error="web_search requires a query.",
         )
 
     if not is_configured():
         return ToolResult(
-            tool_id=ctx.tool_id or "serper_search",
+            tool_id=ctx.tool_id or "web_search",
             error="Serper search is not configured. Set SERPER_SEARCH_API_KEY to enable it.",
         )
 
@@ -149,12 +149,12 @@ async def execute(ctx: ToolExecutionContext) -> ToolResult:
         response = await search(query)
     except Exception as exc:  # noqa: BLE001  # broad-except is intentional at tool boundary
         return ToolResult(
-            tool_id=ctx.tool_id or "serper_search",
+            tool_id=ctx.tool_id or "web_search",
             error=f"Serper search failed: {type(exc).__name__}: {exc}",
         )
 
     return ToolResult(
-        tool_id=ctx.tool_id or "serper_search",
+        tool_id=ctx.tool_id or "web_search",
         output_text=render_search_results(response),
         output_json={"response": response.model_dump(mode="json")},
     )
