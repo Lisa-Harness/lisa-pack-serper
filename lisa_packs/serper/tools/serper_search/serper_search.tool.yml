@@ -1,4 +1,5 @@
 tool_id: web_search
 tool_provider_id: lisa-pack-serper
 description: "Search the web using Serper.dev Google Search API and return grounded results."
+effect: read
 exportable: true
