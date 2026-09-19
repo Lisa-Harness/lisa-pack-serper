@@ -3,3 +3,7 @@ tool_provider_id: lisa-pack-serper
 description: "Search the web using Serper.dev Google Search API and return grounded results."
 effect: read
 exportable: true
+# Per-turn cap: researcher-mode read-loop burn (2026-09-17) issued 15
+# web_search calls with zero synthesis. 6 distinct queries is enough for
+# one turn's briefing.
+max_calls_per_turn: 6
